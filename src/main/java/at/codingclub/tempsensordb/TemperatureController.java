@@ -11,7 +11,8 @@ import java.util.Random;
 @RestController
 public class TemperatureController {
 
-    @Autowired TemperaturService temperaturService;
+    private static final double TOLERANCE = 0.0000001;
+	@Autowired TemperaturService temperaturService;
 
     @GetMapping("/api/temperature")
     public Integer getTemperature(@RequestParam double latitude, @RequestParam double longitude){
@@ -20,8 +21,10 @@ public class TemperatureController {
         CoordinatesTemp foundCoordinate = null;
 
         for (CoordinatesTemp coordinateTemp: coordinatesTemps){
-            foundCoordinate = coordinateTemp;
-            break;
+        	if (isInRange(coordinateTemp, latitude, longitude)) {
+        		foundCoordinate = coordinateTemp;
+        		break;
+        	}
         }
         if(foundCoordinate == null){
             CoordinatesTemp newCoord = new CoordinatesTemp();
@@ -35,6 +38,11 @@ public class TemperatureController {
 
         return foundCoordinate.getTemperature();
     }
+
+	private boolean isInRange(CoordinatesTemp coordinateTemp, double latitude, double longitude) {
+		return Math.abs(coordinateTemp.getLatitude() - latitude) < TOLERANCE &&
+				Math.abs(coordinateTemp.getLongitude() - longitude) < TOLERANCE;
+	}
 
 
 
